@@ -11,7 +11,7 @@
 
 ## 安装教程
 
-安装SimMusic后，将此扩展拖入扩展页面或安装(扩展商店)[https://github.com/PYLXU/pluginStore/]后直接安装
+安装SimMusic后，将此扩展拖入扩展页面或安装[扩展商店](https://github.com/PYLXU/pluginStore/)后直接安装
 
 ## 使用说明
 
