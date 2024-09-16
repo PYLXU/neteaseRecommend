@@ -2,7 +2,7 @@
     "packageId": "neteaseRecommend",
     "extName": "NCM扩展 - 音乐推荐模块",
     "uiName": "网易云支持扩展 - 音乐推荐模块（依赖API支持扩展）",
-    "version": "Alpha-0.1",
+    "version": "Alpha-0.2.1",
     "entries":[
         "function.js",
         "res_css.js",

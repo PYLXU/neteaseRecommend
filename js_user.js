@@ -2,8 +2,8 @@ var scripts = `
 async function loadUserPage() {
         var cookieValue = "";
         config.getItem("ext.ncm.apiHeaders").split("&").map((it) => it.split("=")).forEach((it) => {
-                if (decodeURIComponent(it[0]) == "cookie") {
-                    cookieValue = decodeURIComponent(it[1]);
+                if (decodeURIComponent(decodeURI(it[0])) == "cookie") {
+                    cookieValue = decodeURIComponent(decodeURI(it[1]));
                 }
             });
         if (cookieValue) {
@@ -87,9 +87,9 @@ function ncm_logOut() {
             if (decodeURIComponent(it[0]) == "cookie") {
                 cookieValue = decodeURIComponent(it[1]);
                 fetch(config.getItem("ext.ncm.apiEndpoint") + \`/logout?cookie=\`+cookieValue);
+                config.setItem('ext.ncm.apiHeaders',config.getItem("ext.ncm.apiHeaders").replace('cookie='+it[1],''));
             }
         });
-    config.setItem('ext.ncm.apiHeaders',\`\`);
     document.getElementById('loginForm').style.display = 'block';
     document.getElementById('qrcodeContainer').style.display = 'block';
     document.getElementById('userInfo').style.display = 'none';
@@ -97,7 +97,18 @@ function ncm_logOut() {
 
 function ncm_handleLoginSuccess(data) {
     if (data.cookie) {
-        config.setItem('ext.ncm.apiHeaders',\`cookie=\`+encodeURIComponent(data.cookie));
+        const MUSIC_U_REGEX = /MUSIC_U=(.*?)(?:;|$)/;
+        const match = MUSIC_U_REGEX.exec(data.cookie);
+        if (match) {
+            const currentConfig = config.getItem('ext.ncm.apiHeaders');
+            const targetConfig = encodeURI(encodeURIComponent('cookie')) + '=' + encodeURI(encodeURIComponent('MUSIC_U='+match[1]));
+            if (currentConfig && currentConfig !== "" && currentConfig !== null) {
+                currentConfig = currentConfig + '&' + targetConfig
+            } else {
+                currentConfig = targetConfig
+            }
+            config.setItem('ext.ncm.apiHeaders',targetConfig);
+        }
     }
     document.getElementById('username').innerText = data.profile.nickname;
     document.getElementById('avatar').src = data.profile.avatarUrl;
