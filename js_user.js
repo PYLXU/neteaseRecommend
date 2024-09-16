@@ -1,5 +1,17 @@
 var scripts = `
-async function loadUserPage() {
+function ncm_getHeaders() {
+    let headers = {};
+    const headersConf = config.getItem("ext.ncm.apiHeaders");
+    if (headersConf) {
+        headersConf.split('&').forEach(pair => {
+            const [key, value] = pair.split('=');
+            key && value && (headers[decodeURIComponent(key)] = decodeURIComponent(value));
+        });
+    }
+    return headers;
+}
+
+async function ncm_loadUserPage() {
         var cookieValue = "";
         config.getItem("ext.ncm.apiHeaders").split("&").map((it) => it.split("=")).forEach((it) => {
                 if (decodeURIComponent(decodeURI(it[0])) == "cookie") {
@@ -7,7 +19,7 @@ async function loadUserPage() {
                 }
             });
         if (cookieValue) {
-            const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + \`/login/status?cookie=\`+cookieValue);
+            const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + \`/login/status?cookie=\`+cookieValue , { headers: ncm_getHeaders() });
             const data = await response.json();
             if (data.data.profile) {
                 ncm_handleLoginSuccess(data.data);
@@ -20,11 +32,11 @@ async function loadUserPage() {
 }
 async function ncm_generateQRCode() {
     try {
-        const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + '/login/qr/key', { method: 'GET' });
+        const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + '/login/qr/key' , { headers: ncm_getHeaders() });
         const data = await response.json();
         const key = data.data.unikey;
 
-        const qrResponse = await fetch(config.getItem("ext.ncm.apiEndpoint") + \`/login/qr/create?key=\${key}&qrimg=true\`);
+        const qrResponse = await fetch(config.getItem("ext.ncm.apiEndpoint") + \`/login/qr/create?key=\${key}&qrimg=true\` , { headers: ncm_getHeaders() });
         const qrData = await qrResponse.json();
 
         const qrcodeElement = document.getElementById('qrcode');
@@ -39,7 +51,7 @@ async function ncm_generateQRCode() {
 async function ncm_checkQRCodeStatus(key) {
     const interval = setInterval(async () => {
         try {
-            const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + \`/login/qr/check?key=\${key}\`);
+            const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + \`/login/qr/check?key=\${key}\` , { headers: ncm_getHeaders() });
             const data = await response.json();
 
             if (data.code === 803) {
@@ -62,13 +74,7 @@ async function ncm_loginWithEmail() {
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + '/login?email='+email+'&password='+password, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include', // 允许携带cookies
-        })
+        const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + '/login?email='+email+'&password='+password , { headers: ncm_getHeaders() })
 
         const data = await response.json();
         if (data.code === 200) {
@@ -86,7 +92,7 @@ function ncm_logOut() {
     config.getItem("ext.ncm.apiHeaders").split("&").map((it) => it.split("=")).forEach((it) => {
             if (decodeURIComponent(it[0]) == "cookie") {
                 cookieValue = decodeURIComponent(it[1]);
-                fetch(config.getItem("ext.ncm.apiEndpoint") + \`/logout?cookie=\`+cookieValue);
+                fetch(config.getItem("ext.ncm.apiEndpoint") + \`/logout?cookie=\`+cookieValue , { headers: ncm_getHeaders() });
                 config.setItem('ext.ncm.apiHeaders',config.getItem("ext.ncm.apiHeaders").replace('cookie='+it[1],''));
             }
         });

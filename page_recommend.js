@@ -24,7 +24,7 @@ ncm_recommendPage.innerHTML = `<div class="header">
         <button class="tablink" onclick="openTab(event, 'ncm_List');ncm_getsongListRecommend()">歌单推荐</button>
         <button class="tablink" onclick="openTab(event, 'ncm_ListSearch');">歌单搜索</button>
         <button class="tablink" onclick="openTab(event, 'ncm_MVSearch');">MV</button>
-        <button class="tablink" onclick="switchRightPage('ncm_userPage');loadUserPage()">我的账户</button>
+        <button class="tablink" onclick="switchRightPage('ncm_userPage');ncm_loadUserPage()">我的账户</button>
     </div>
 </div><br>
 <div id="ncm_recommendPageMain">

@@ -3,7 +3,7 @@ var ncm_userPageButton = document.createElement("i");
 ncm_userPageButton.setAttribute("id", "miniBtn");
 ncm_userPageButton.setAttribute("style", "transform: none;");
 ncm_userPageButton.setAttribute("title", "网易云账号");
-ncm_userPageButton.setAttribute("onclick", "switchRightPage('ncm_userPage');loadUserPage()");
+ncm_userPageButton.setAttribute("onclick", "switchRightPage('ncm_userPage');ncm_loadUserPage()");
 
 ncm_userPageButton.innerHTML = '';
 

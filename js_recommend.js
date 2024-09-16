@@ -1,6 +1,6 @@
 var scripts = `
 
-function requestMusicChange(ids, cleanList = false) {
+function ncm_requestMusicChange(ids, cleanList = false) {
     var musicIds = ids.toString().split(',').map(id => id.trim());
     var targetMusic = musicIds.map(id => 'ncm:' + id);
     function updateCallback() {
@@ -29,7 +29,7 @@ function ncm_loadMusicList(id) {
 }
 
 function ncm_loadMovie(id, title = '无标题') {
-    fetch(config.getItem("ext.ncm.apiEndpoint") + \`/mv/url?id=\${id}\`)
+    fetch(config.getItem("ext.ncm.apiEndpoint") + \`/mv/url?id=\${id}\` , { headers: ncm_getHeaders() })
         .then(response => response.json())
         .then(data => {
             openTab(null,'ncm_vedioPlay');
@@ -41,7 +41,7 @@ function ncm_loadMovie(id, title = '无标题') {
 
 function ncm_searchMovie(keyword) {
     const apiUrl = config.getItem("ext.ncm.apiEndpoint") + \`/search?type=1004&keywords=\${encodeURIComponent(keyword)}\`;
-    fetch(apiUrl)
+    fetch(apiUrl , { headers: ncm_getHeaders() })
         .then(response => response.json())
         .then(data => {
             const searchResults = document.getElementById('ncm_searchResults_mv_list');
@@ -71,7 +71,7 @@ document.getElementById('ncm_search_mv_form').onsubmit = function (event) {
 
 function ncm_searchList(keyword) {
     const apiUrl = config.getItem("ext.ncm.apiEndpoint") + \`/search?keywords=\${encodeURIComponent(keyword)}&type=1000\`;
-    fetch(apiUrl)
+    fetch(apiUrl , { headers: ncm_getHeaders() })
         .then(response => response.json())
         .then(data => {
             const searchResults = document.getElementById('ncm_searchResults_list');
@@ -101,7 +101,7 @@ document.getElementById('ncm_search_form').onsubmit = function (event) {
 
 function ncm_getsongListRecommend() {
     const apiUrl = config.getItem("ext.ncm.apiEndpoint") + \`/personalized?limit=15\`;
-    fetch(apiUrl)
+    fetch(apiUrl , { headers: ncm_getHeaders() })
         .then(response => response.json())
         .then(data => {
             const searchResults = document.getElementById('ncm_songListRecommend');
@@ -129,7 +129,7 @@ function ncm_getsongListRecommend() {
 
 function ncm_getRankList() {
     const apiUrl = config.getItem("ext.ncm.apiEndpoint") + \`/toplist/detail\`;
-    fetch(apiUrl)
+    fetch(apiUrl , { headers: ncm_getHeaders() })
         .then(response => response.json())
         .then(data => {
             const searchResults = document.getElementById('ncm_rankList');
@@ -157,7 +157,7 @@ function ncm_getRankList() {
 
 function ncm_getNewSong() {
     const apiUrl = config.getItem("ext.ncm.apiEndpoint") + \`/personalized/newsong\`;
-    fetch(apiUrl)
+    fetch(apiUrl , { headers: ncm_getHeaders() })
         .then(response => response.json())
         .then(data => {
             const searchResults = document.getElementById('ncm_newSong');
@@ -169,7 +169,7 @@ function ncm_getNewSong() {
                 data.result.forEach(song => {
                     playList += song.id + ",";
                     resultsHtml += \`
-                    <a href="javascript:requestMusicChange(\${song.id})">
+                    <a href="javascript:ncm_requestMusicChange(\${song.id})">
                         <button style="padding:0; width:150px; height:180px; margin-right:5px;margin-bottom:10px;" class="sub" type="submit">
                             <img style="width:100%; height:auto; border-radius:5px" alt="封面" src="\${song.picUrl}?param=150y150" height="35px"/>
                             <br>
@@ -185,7 +185,7 @@ function ncm_getNewSong() {
                     playList = playList.slice(0, -1);
                 }
 
-                document.getElementById('ncm_fastPlay_newSong').setAttribute('onclick', \`requestMusicChange("\${playList}", true)\`);
+                document.getElementById('ncm_fastPlay_newSong').setAttribute('onclick', \`ncm_requestMusicChange("\${playList}", true)\`);
             } else {
                 searchResults.innerHTML = \`获取失败\` + data.msg;
             }
@@ -194,13 +194,14 @@ function ncm_getNewSong() {
 }
 
 function ncm_getRecommendSong() {
+    var cookieValue = ""
     config.getItem("ext.ncm.apiHeaders").split("&").map((it) => it.split("=")).forEach((it) => {
-            if (decodeURIComponent(it[0]) == "cookie") {
-                cookieValue = decodeURIComponent(it[1]);
+            if (decodeURIComponent(decodeURI(it[0])) == "cookie") {
+                cookieValue = decodeURIComponent(decodeURI(it[1]));
             }
         });
     const apiUrl = config.getItem("ext.ncm.apiEndpoint") + \`/recommend/songs?cookie=\` + cookieValue;
-    fetch(apiUrl)
+    fetch(apiUrl , { headers: ncm_getHeaders() })
         .then(response => response.json())
         .then(data => {
             const searchResults = document.getElementById('ncm_recommendSong');
@@ -212,7 +213,7 @@ function ncm_getRecommendSong() {
                 data.data.dailySongs.forEach(song => {
                     playList += song.id + ","; // Add song ID to playList
                     resultsHtml += \`
-                    <a href="javascript:requestMusicChange(\${song.id})">
+                    <a href="javascript:ncm_requestMusicChange(\${song.id})">
                         <button style="padding:0; width:150px; height:180px; margin-right:5px;margin-bottom:10px;" class="sub" type="submit">
                             <img style="width:100%; height:auto; border-radius:5px" alt="封面" src="\${song.al.picUrl}?param=150y150" height="35px"/>
                             <br>
@@ -228,7 +229,7 @@ function ncm_getRecommendSong() {
                     playList = playList.slice(0, -1);
                 }
 
-                document.getElementById('ncm_fastPlay_recommendSong').setAttribute('onclick', \`requestMusicChange("\${playList}", true)\`);
+                document.getElementById('ncm_fastPlay_recommendSong').setAttribute('onclick', \`ncm_requestMusicChange("\${playList}", true)\`);
             } else {
                 searchResults.innerHTML = \`获取失败：\` + data.msg;
             }

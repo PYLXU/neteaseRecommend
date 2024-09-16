@@ -1,15 +1,4 @@
-async function checkNCMPluginInstalled() {
-    const extData = await ExtensionRuntime.getExtData();
-    if (extData.hasOwnProperty('ncm')) {
-        return;
-    }
-    if (!confirm('NCM扩展 - 音乐推荐模块：您尚未安装NCM主支持扩展，点击确认以安装')) {
-        return;
-    }
-    var url = `https://proxies.3r60.top/https://api.github.com/repos/Simsv-Software/SimMusic-NCM-Ext/releases/latest`;
-    const response = await fetch(url);
-    const release = response.json();
-    var url = 'https://mirror.ghproxy.com/https://github.com/Simsv-Software/SimMusic-NCM-Ext/releases/download/${release.tag_name}/extension.zip';
+async function ncm_downloadAndInstallExtension(url) {
     const tempDir = require('os').tmpdir();
     const filename = url.substring(url.lastIndexOf('/') + 1);
     const filePath = path.join(tempDir, filename);
@@ -19,7 +8,7 @@ async function checkNCMPluginInstalled() {
     xhr.onprogress = function (event) {
         if (event.lengthComputable) {
             const percentComplete = (event.loaded / event.total) * 100;
-            console.log(`下载进度: \${percentComplete.toFixed(2)}%`);
+            console.log(`下载进度: ${percentComplete.toFixed(2)}%`);
         }
     };
 
@@ -44,12 +33,45 @@ async function checkNCMPluginInstalled() {
 
             fileReader.readAsArrayBuffer(blob); // Ensure xhr.response is a Blob
         } else {
-            console.error(`下载失败，状态码: \${xhr.status}`);
+            console.error(`下载失败，状态码: ${xhr.status}`);
         }
     };
+
+    xhr.open('GET', url, true);
+    xhr.responseType = 'blob';
+    xhr.send();
 }
 
-checkNCMPluginInstalled();
+async function ncm_checkNCMPluginInstalled() {
+    const extData = await ExtensionRuntime.getExtData();
+    if (extData.hasOwnProperty('ncm')) {
+        return;
+    }
+    var url = `https://proxies.3r60.top/https://api.github.com/repos/PYLXU/neteaseSupport/releases/latest`;
+    const response = await fetch(url);
+    var release = await response.json();
+    confirm('NCM扩展 - 音乐推荐模块：您尚未安装NCM主支持扩展，点击确认以安装',()=>{
+        url = `https://mirror.ghproxy.com/https://github.com/PYLXU/neteaseSupport/releases/download/${release.tag_name}/extension.zip`;
+        ncm_downloadAndInstallExtension(url);
+    })
+}
+
+async function ncm_checkUpdate() {
+    const extData = await ExtensionRuntime.getExtData();
+    var url = `https://proxies.3r60.top/https://api.github.com/repos/PYLXU/neteaseRecommend/releases/latest`;
+    const response = await fetch(url);
+    var release = await response.json();
+    if (extData['neteaseRecommend'] && extData['neteaseRecommend'].version === release.tag_name) {
+        return;
+    }
+    confirm(`NCM扩展 - 音乐推荐模块：扩展存在新的版本${release.tag_name}，是否立即更新？`,()=>{
+        url = `https://mirror.ghproxy.com/https://github.com/PYLXU/neteaseRecommend/releases/download/${release.tag_name}/extension.zip`;
+        ncm_downloadAndInstallExtension(url);
+    })
+}
+
+ncm_checkNCMPluginInstalled();
+ncm_checkUpdate();
 
 
 function insertAfter(newElement, targetElement) {
