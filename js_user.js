@@ -32,11 +32,11 @@ async function ncm_loadUserPage() {
 }
 async function ncm_generateQRCode() {
     try {
-        const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + '/login/qr/key' , { headers: ncm_getHeaders() });
+        const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + '/login/qr/key?timestamp=\${Date.now()}' , { headers: ncm_getHeaders() });
         const data = await response.json();
         const key = data.data.unikey;
 
-        const qrResponse = await fetch(config.getItem("ext.ncm.apiEndpoint") + \`/login/qr/create?key=\${key}&qrimg=true\` , { headers: ncm_getHeaders() });
+        const qrResponse = await fetch(config.getItem("ext.ncm.apiEndpoint") + \`/login/qr/create?key=\${key}&qrimg=true&timestamp=\${Date.now()}\` , { headers: ncm_getHeaders() });
         const qrData = await qrResponse.json();
 
         const qrcodeElement = document.getElementById('qrcode');
@@ -51,7 +51,7 @@ async function ncm_generateQRCode() {
 async function ncm_checkQRCodeStatus(key) {
     const interval = setInterval(async () => {
         try {
-            const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + \`/login/qr/check?key=\${key}\` , { headers: ncm_getHeaders() });
+            const response = await fetch(config.getItem("ext.ncm.apiEndpoint") + \`/login/qr/check?key=\${key}&timestamp=\${Date.now()}\` , { headers: ncm_getHeaders() });
             const data = await response.json();
 
             if (data.code === 803) {
@@ -106,22 +106,29 @@ function ncm_handleLoginSuccess(data) {
         const MUSIC_U_REGEX = /MUSIC_U=(.*?)(?:;|$)/;
         const match = MUSIC_U_REGEX.exec(data.cookie);
         if (match) {
-            const currentConfig = config.getItem('ext.ncm.apiHeaders');
-            const targetConfig = encodeURI(encodeURIComponent('cookie')) + '=' + encodeURI(encodeURIComponent('MUSIC_U='+match[1]));
+            var currentConfig = config.getItem('ext.ncm.apiHeaders');
+            var targetConfig = encodeURI(encodeURIComponent('cookie')) + '=' + encodeURI(encodeURIComponent('MUSIC_U='+match[1]));
             if (currentConfig && currentConfig !== "" && currentConfig !== null) {
                 currentConfig = currentConfig + '&' + targetConfig
             } else {
                 currentConfig = targetConfig
             }
-            config.setItem('ext.ncm.apiHeaders',targetConfig);
+            config.setItem('ext.ncm.apiHeaders',currentConfig);
         }
-    }
-    document.getElementById('username').innerText = data.profile.nickname;
-    document.getElementById('avatar').src = data.profile.avatarUrl;
+        if (data.profile) {
+            document.getElementById('username').innerText = data.profile.nickname;
+            document.getElementById('avatar').src = data.profile.avatarUrl;
+        } else if (data.account && data.account.userName) {
+            document.getElementById('username').innerText = data.account.userName;
+            document.getElementById('avatar').src = 'https://s1.music.126.net/style/favicon.ico';
+        } else {
+            console.error('数据格式不正确');
+        }
 
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('qrcodeContainer').style.display = 'none';
-    document.getElementById('userInfo').style.display = 'block';
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('qrcodeContainer').style.display = 'none';
+        document.getElementById('userInfo').style.display = 'block';
+    }
 }`;
 
 includeScriptElement(scripts);
