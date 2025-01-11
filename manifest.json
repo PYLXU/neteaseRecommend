@@ -4,6 +4,7 @@
     "uiName": "网易云支持扩展 - 音乐推荐模块（依赖API支持扩展）",
     "version": "0.2.5",
     "entries":[
+        "main.js",
         "user.js",
         "recommend.js"
     ]
