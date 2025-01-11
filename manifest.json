@@ -4,12 +4,8 @@
     "uiName": "网易云支持扩展 - 音乐推荐模块（依赖API支持扩展）",
     "version": "Alpha-0.2.4",
     "entries":[
-        "function.js",
-        "res_css.js",
-        "page_user.js",
-        "js_user.js",
-        "page_recommend.js",
-        "js_recommend.js"
+        "user.js",
+        "recommend.js"
     ]
   }
   
