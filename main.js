@@ -88,6 +88,8 @@ async function ncm_checkUpdate() {
     }
   );
 }
-
+if(config.getItem("ext.ncm.apiEndpoint") === "") {
+    alert("NCM扩展 - 音乐推荐模块：请设置NCM主支持扩展的API地址。")
+}
 ncm_checkNCMPluginInstalled();
 ncm_checkUpdate();

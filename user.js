@@ -2,7 +2,7 @@
 const userPage = ExtensionFunctions.insertNavigationItem({
     pageId: "userPage",
     icon: "EE08",
-    text: "我的",
+    text: "账号",
     appendBefore: "searchPage",
 });
 
